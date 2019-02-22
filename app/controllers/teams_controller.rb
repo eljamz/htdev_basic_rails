@@ -3,7 +3,7 @@ class TeamsController < ApplicationController
 
   def index
     @teams = Team.all
-    render json: @teams
+    render json: @teams, include: [:users]
   end
 
   def show
@@ -12,17 +12,28 @@ class TeamsController < ApplicationController
 
   def create
     @team = Team.create(team_params)
-    render json: @team
+
+    if @team.save
+      render json: @team, status: :created
+    else
+      render json: @team.errors, status: :unprocessable_entity
+    end
   end
 
   def update
-    @team.update(team_params)
-    render json: @team
+    if @team.update(team_params)
+      render json: @team
+    else
+      render json: @team.errors, status: :unprocessable_entity
+    end
   end
 
   def destroy
-    @team.delete
-    render json: true
+    if @team.delete
+      render json: true
+    else
+      render json: false
+    end
   end
 
   private

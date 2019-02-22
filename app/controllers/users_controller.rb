@@ -3,8 +3,7 @@ class UsersController < ApplicationController
 
   def index
     @users = User.all
-    binding.pry
-    render json: @users
+    render json: @users, include: [:team]
   end
 
   def show
@@ -13,17 +12,28 @@ class UsersController < ApplicationController
 
   def create
     @user = User.create(user_params)
-    render json: @user
+
+    if @user.save
+      render json: @user, status: :created
+    else
+      render json: @user.errors, status: :unprocessable_entity
+    end
   end
 
   def update
-    @user.update(user_params)
-    render json: @user
+    if @user.update(user_params)
+      render json: @user
+    else
+      render json: @user.errors, status: :unprocessable_entity
+    end
   end
 
   def destroy
-    @user.delete
-    render json: true
+    if @user.delete
+      render json: true
+    else
+      render json: false
+    end
   end
 
   private
@@ -36,7 +46,8 @@ class UsersController < ApplicationController
         :first_name,
         :last_name,
         :birthdate,
-        :gamertag
+        :gamertag,
+        :team_id
       )
     end
 end
